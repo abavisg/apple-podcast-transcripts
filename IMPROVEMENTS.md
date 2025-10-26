@@ -1,357 +1,235 @@
 # Future Improvements & Feature Roadmap
 
-This document captures all planned improvements, features, and enhancements extracted from the project README and other sources. Items are organized by priority and implementation complexity.
+**This document has been reorganized!** All features have been broken down into individual, detailed specification files located in the [specs/](specs/) directory.
 
 ---
 
-## 1. Markdown Export
+## 📋 Quick Overview
 
-**Priority:** High
-**Complexity:** Low
-**Status:** Planned
+We've identified **21 distinct features** organized into **4 implementation phases**:
 
-### Overview
-Add the ability to download transcripts in well-formatted markdown files with complete metadata.
+| Phase | Focus | Features | Estimated Time |
+|-------|-------|----------|----------------|
+| **Phase 1** | Quick Wins | 5 features | 2-3 weeks |
+| **Phase 2** | AI Features | 5 features | 4-5 weeks |
+| **Phase 3** | Enhanced UX | 6 features | 3-4 weeks |
+| **Phase 4** | Performance | 5 features | 3-4 weeks |
 
-### Proposed Features
-- Download button on each transcript popup
-- Include frontmatter with metadata:
-  - Podcast title and author
-  - Episode title
-  - Publication date
-  - Duration
-  - Episode description
-- Clean markdown formatting with proper sections
-- Filename format: `[PodcastName] - [EpisodeTitle] - [Date].md`
-
-### Example Output
-```markdown
----
-podcast: The Example Podcast
-author: John Doe
-episode: Episode 42: The Future of AI
-date: January 15, 2025
-duration: 1 HR 23 MIN
----
-
-# Episode 42: The Future of AI
-
-**Podcast:** The Example Podcast
-**Host:** John Doe
-**Date:** January 15, 2025
-**Duration:** 1 HR 23 MIN
-
-## Description
-This episode explores the cutting edge of artificial intelligence...
-
-## Transcript
-
-[Full transcript content here...]
-```
-
-### Implementation Notes
-- Use `Blob` API to generate downloadable files
-- Add download button to transcript modal
-- Preserve speaker attribution if available
-
-### Technical Tasks
-- [ ] Create markdown formatter function
-- [ ] Generate frontmatter from episode metadata
-- [ ] Add download button UI component to modal
-- [ ] Implement blob creation and download trigger
-- [ ] Add filename sanitization for safe file names
-- [ ] Test across different browsers
+**Total Estimated Effort:** 12-16 weeks
 
 ---
 
-## 2. AI-Powered Transcript Analysis via Ollama
+## 🔗 Browse Specifications
 
-**Priority:** High
-**Complexity:** Medium
-**Status:** Planned
+### By Priority
 
-### Overview
-Integrate local LLM analysis using Ollama to provide intelligent insights without compromising privacy.
+#### 🔴 High Priority (Must Have)
+- [SPEC-001: Markdown Export](specs/SPEC-001-markdown-export.md) - Download transcripts as formatted markdown files
+- [SPEC-002: AI Quick Summary](specs/SPEC-002-ollama-quick-summary.md) - 2-3 sentence episode summaries
+- [SPEC-003: AI Detailed Summary](specs/SPEC-003-ollama-detailed-summary.md) - Comprehensive 300-500 word summaries
+- [SPEC-004: AI Resource Extraction](specs/SPEC-004-ollama-resource-extraction.md) - Extract books, tools, people, companies mentioned
+- [SPEC-006: Ollama Core Integration](specs/SPEC-006-ollama-core-integration.md) - ⚠️ **Foundation for all AI features**
 
-### Why Ollama?
-- Runs completely locally (privacy-first)
-- No API costs
-- Supports multiple open-source models (Llama 3, Mistral, etc.)
-- Fast inference on modern hardware
+#### 🟡 Medium Priority (Should Have)
+- [SPEC-005: AI Actionable Items](specs/SPEC-005-ollama-actionable-items.md) - Extract practical takeaways and ideas
+- [SPEC-007: File System Access API](specs/SPEC-007-file-system-access-api.md) - Persistent folder access
+- [SPEC-008: Folder Refresh Mechanism](specs/SPEC-008-folder-refresh.md) - Auto-refresh for new episodes
+- [SPEC-009: Search & Filter](specs/SPEC-009-search-filter.md) - Full-text search and filtering
+- [SPEC-010: Bookmarks & Favorites](specs/SPEC-010-bookmarks-favorites.md) - Save favorite episodes
+- [SPEC-014: Keyboard Navigation](specs/SPEC-014-accessibility-keyboard.md) - Complete keyboard accessibility
+- [SPEC-015: Screen Reader Support](specs/SPEC-015-accessibility-screen-reader.md) - ARIA and semantic HTML
+- [SPEC-016: Visual Accessibility](specs/SPEC-016-accessibility-visual.md) - High contrast, font size controls
 
-### Proposed Analysis Features
-
-#### a) Quick Summary
-- 2-3 sentence overview of the episode
-- Display inline on episode card or in modal header
-- Ideal for quickly deciding what to listen to
-
-#### b) Detailed Summary
-- Comprehensive breakdown of main topics discussed
-- Key arguments and takeaways
-- Chapter-like structure for long episodes
-- 300-500 word summary
-
-#### c) Resource Extraction
-Automatically identify and list:
-- **Products mentioned:** Software, hardware, tools
-- **Projects referenced:** Open source projects, startups, initiatives
-- **Books recommended:** Titles and authors
-- **Websites/URLs:** Resources shared during discussion
-- **People mentioned:** Guests, referenced experts
-- **Companies discussed:** Organizations, brands
-- **Concepts/Technologies:** Technical terms, frameworks, methodologies
-
-Output as categorized markdown list for easy reference.
-
-#### d) Actionable Items & Ideas
-Extract practical takeaways:
-- Implementable ideas for developers
-- Recommended practices or techniques
-- Learning opportunities (courses, tools to try)
-- Follow-up research topics
-- Action items mentioned by speakers
-
-### UI/UX Considerations
-- "Analyze with AI" button on each transcript
-- Tabbed interface within modal: Transcript | Summary | Resources | Actions
-- Loading states while Ollama processes
-- Cache analysis results locally (IndexedDB)
-- Model selection dropdown (let users choose Llama 3, Mistral, etc.)
-- Batch analysis option (analyze all transcripts)
-
-### Technical Implementation
-
-Example Ollama API call:
-```javascript
-async function analyzeTranscript(transcript, analysisType) {
-  const prompts = {
-    summary: `Provide a 2-3 sentence summary of this podcast transcript:\n\n${transcript}`,
-    detailed: `Provide a detailed summary with main topics and key takeaways:\n\n${transcript}`,
-    resources: `Extract all mentioned products, projects, books, tools, and resources from this transcript. Format as categorized markdown list:\n\n${transcript}`,
-    actionable: `Extract actionable items, implementable ideas, and practical takeaways from this transcript:\n\n${transcript}`
-  };
-
-  const response = await fetch('http://localhost:11434/api/generate', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'llama3',  // or user-selected model
-      prompt: prompts[analysisType],
-      stream: false
-    })
-  });
-
-  return response.json();
-}
-```
-
-### Requirements
-- Ollama installed and running locally (`ollama serve`)
-- User instruction to install Ollama if not detected
-- Graceful degradation if Ollama is unavailable
-
-### Technical Tasks
-- [ ] Design UI for analysis features (tabs, buttons, loading states)
-- [ ] Implement Ollama connection and health check
-- [ ] Create prompt templates for each analysis type
-- [ ] Build analysis request/response handlers
-- [ ] Implement IndexedDB caching for results
-- [ ] Add model selection UI and configuration
-- [ ] Create batch analysis workflow
-- [ ] Add error handling and fallback messaging
-- [ ] Write user documentation for Ollama setup
-- [ ] Test with various transcript lengths and models
+#### 🟢 Low Priority (Nice to Have)
+- [SPEC-011: Export to Plain Text](specs/SPEC-011-export-text.md) - Plain .txt export
+- [SPEC-012: Export to PDF](specs/SPEC-012-export-pdf.md) - Formatted PDF export
+- [SPEC-013: Batch Export](specs/SPEC-013-batch-export.md) - Export multiple episodes as ZIP
+- [SPEC-017: Virtual Scrolling](specs/SPEC-017-performance-virtual-scroll.md) - Handle 1000+ episodes
+- [SPEC-018: Web Workers](specs/SPEC-018-performance-web-workers.md) - Offload heavy processing
+- [SPEC-019: Service Worker](specs/SPEC-019-performance-service-worker.md) - Offline support
+- [SPEC-020: Timeline & Statistics](specs/SPEC-020-data-viz-timeline.md) - Listening analytics
+- [SPEC-021: Word Clouds](specs/SPEC-021-data-viz-wordcloud.md) - Topic visualization
 
 ---
 
-## 3. Enhanced File Access Methods
+## 📁 By Category
 
-**Priority:** Medium
-**Complexity:** Medium-High
-**Status:** Planned
+### 📤 Export Features (4 specs)
+| Spec | Feature | Priority | Effort |
+|------|---------|----------|--------|
+| [001](specs/SPEC-001-markdown-export.md) | Markdown Export | High | 2-3 days |
+| [011](specs/SPEC-011-export-text.md) | Plain Text Export | Low | 1-2 days |
+| [012](specs/SPEC-012-export-pdf.md) | PDF Export | Low | 3-4 days |
+| [013](specs/SPEC-013-batch-export.md) | Batch Export | Low | 2-3 days |
 
-### Overview
-Provide multiple ways to access podcast data while maintaining the simplicity of the current drag-and-drop approach.
+### 🤖 AI-Powered Features (5 specs)
+| Spec | Feature | Priority | Effort | Dependencies |
+|------|---------|----------|--------|--------------|
+| [006](specs/SPEC-006-ollama-core-integration.md) | **Ollama Core** | High | 5-7 days | None ⚠️ |
+| [002](specs/SPEC-002-ollama-quick-summary.md) | Quick Summary | High | 3-4 days | SPEC-006 |
+| [003](specs/SPEC-003-ollama-detailed-summary.md) | Detailed Summary | High | 3-4 days | SPEC-006 |
+| [004](specs/SPEC-004-ollama-resource-extraction.md) | Resource Extraction | High | 4-5 days | SPEC-006 |
+| [005](specs/SPEC-005-ollama-actionable-items.md) | Actionable Items | Medium | 3-4 days | SPEC-006 |
 
-### Option A: File System Access API (Modern Approach)
+### 📁 File Access (2 specs)
+| Spec | Feature | Priority | Effort | Dependencies |
+|------|---------|----------|--------|--------------|
+| [007](specs/SPEC-007-file-system-access-api.md) | File System API | Medium | 4-5 days | None |
+| [008](specs/SPEC-008-folder-refresh.md) | Folder Refresh | Medium | 2-3 days | SPEC-007 |
 
-**Features:**
-- Button to "Select Podcast Folder"
-- Uses [File System Access API](https://developer.mozilla.org/en-US/docs/Web/API/File_System_Access_API)
-- Grants persistent permission to read from selected directory
-- "Refresh" button to re-scan folder for new transcripts
-- Auto-refresh option (check for changes every N seconds/minutes)
+### 🔍 Search & Organization (2 specs)
+| Spec | Feature | Priority | Effort |
+|------|---------|----------|--------|
+| [009](specs/SPEC-009-search-filter.md) | Search & Filter | Medium | 3-4 days |
+| [010](specs/SPEC-010-bookmarks-favorites.md) | Bookmarks | Low-Med | 2-3 days |
 
-**Benefits:**
-- No need to drag files repeatedly
-- Always up-to-date with new transcripts
-- More intuitive for regular users
-- Better for watching a folder over time
+### ♿ Accessibility (3 specs)
+| Spec | Feature | Priority | Effort |
+|------|---------|----------|--------|
+| [014](specs/SPEC-014-accessibility-keyboard.md) | Keyboard Nav | Medium | 2-3 days |
+| [015](specs/SPEC-015-accessibility-screen-reader.md) | Screen Readers | Medium | 2-3 days |
+| [016](specs/SPEC-016-accessibility-visual.md) | Visual Options | Medium | 2-3 days |
 
-**Limitations:**
-- Requires Chromium-based browsers (Chrome, Edge, Brave)
-- Not supported in Firefox or Safari yet
-- Needs user permission grant
+### ⚡ Performance (3 specs)
+| Spec | Feature | Priority | Effort |
+|------|---------|----------|--------|
+| [017](specs/SPEC-017-performance-virtual-scroll.md) | Virtual Scrolling | Low | 3-4 days |
+| [018](specs/SPEC-018-performance-web-workers.md) | Web Workers | Low | 3-4 days |
+| [019](specs/SPEC-019-performance-service-worker.md) | Service Worker | Low | 3-4 days |
 
-### Option B: File Input with Directory Selection
-
-**Features:**
-- Fallback for browsers without File System Access API
-- `<input type="file" webkitdirectory>` for folder selection
-- Manual refresh button required (no persistent access)
-- More compatible but less convenient
-
-### Proposed Hybrid UX
-
-```
-┌─────────────────────────────────────────────────────┐
-│  Apple Podcast Transcript Viewer                   │
-├─────────────────────────────────────────────────────┤
-│                                                     │
-│  Choose how to load your transcripts:              │
-│                                                     │
-│  ┌──────────────────┐  ┌──────────────────┐        │
-│  │  Select Folder   │  │  Drag & Drop     │        │
-│  │                  │  │                  │        │
-│  │  Pick the Apple  │  │  Drag the entire │        │
-│  │  Podcasts folder │  │  folder here     │        │
-│  │  and keep it     │  │                  │        │
-│  │  synced          │  │  Quick one-time  │        │
-│  │                  │  │  access          │        │
-│  │  [Select Folder] │  │  [Drop Zone]     │        │
-│  └──────────────────┘  └──────────────────┘        │
-│                                                     │
-│  [ ] Auto-refresh every 5 minutes                  │
-│  [Refresh Now]                                      │
-└─────────────────────────────────────────────────────┘
-```
-
-### Implementation Strategy
-1. Keep existing drag-and-drop as default/primary method
-2. Add "Select Folder" button for persistent access
-3. Feature detection: show File System Access API option only if supported
-4. Store folder handle in IndexedDB for future sessions
-5. Add refresh button when folder is selected
-6. Optional auto-refresh with configurable interval
-
-### Additional UX Enhancements
-- Show "last updated" timestamp
-- Visual indicator when new transcripts are found
-- Notification badge for new episodes since last check
-- Search/filter functionality across all transcripts
-- Favorite/bookmark specific episodes
-
-### Browser Compatibility
-
-```javascript
-// Feature detection
-if ('showDirectoryPicker' in window) {
-  // Use File System Access API
-  const dirHandle = await window.showDirectoryPicker();
-  // Store handle in IndexedDB for persistence
-} else if ('webkitdirectory' in HTMLInputElement.prototype) {
-  // Fallback to directory input
-  <input type="file" webkitdirectory>
-} else {
-  // Keep only drag-and-drop
-}
-```
-
-### Technical Tasks
-- [ ] Implement File System Access API integration
-- [ ] Add feature detection and browser compatibility checks
-- [ ] Create folder selection UI components
-- [ ] Implement IndexedDB storage for folder handles
-- [ ] Build refresh mechanism (manual and auto)
-- [ ] Add fallback to webkitdirectory input
-- [ ] Create "last updated" timestamp display
-- [ ] Add visual indicators for new transcripts
-- [ ] Implement search/filter functionality
-- [ ] Add bookmark/favorite feature
-- [ ] Test across Chrome, Edge, Brave, Firefox, Safari
-- [ ] Write user documentation for different access methods
+### 📊 Data Visualization (2 specs)
+| Spec | Feature | Priority | Effort |
+|------|---------|----------|--------|
+| [020](specs/SPEC-020-data-viz-timeline.md) | Timeline & Stats | Low | 3-4 days |
+| [021](specs/SPEC-021-data-viz-wordcloud.md) | Word Clouds | Low | 3-4 days |
 
 ---
 
-## Additional Potential Improvements
+## 🗺️ Implementation Roadmap
 
-### 4. Search and Filter Enhancements
-**Priority:** Medium
-**Complexity:** Low-Medium
+### Phase 1: Quick Wins (2-3 weeks)
+**Goal:** Deliver immediate value with accessible, exportable transcripts
 
-- Full-text search across all transcript content
-- Filter by podcast name, author, date range
-- Advanced search with boolean operators
-- Search result highlighting
-- Search history
+✅ **Markdown Export** - Let users download transcripts for their note-taking apps
+✅ **Search & Filter** - Help users find specific episodes quickly
+✅ **Accessibility Suite** - Make the app usable for everyone (keyboard, screen readers, visual options)
 
-### 5. Export Options
-**Priority:** Low
-**Complexity:** Low
-
-- Export to plain text (.txt)
-- Export to PDF with formatting
-- Batch export multiple transcripts
-- Export with or without metadata
-
-### 6. Accessibility Improvements
-**Priority:** Medium
-**Complexity:** Low
-
-- Keyboard navigation support
-- ARIA labels and roles
-- Screen reader optimization
-- High contrast mode
-- Font size controls
-
-### 7. Performance Optimizations
-**Priority:** Low
-**Complexity:** Medium
-
-- Virtual scrolling for large episode lists
-- Lazy loading of transcript content
-- Web Worker for transcript parsing
-- Service Worker for offline capabilities
-- Optimize database queries
-
-### 8. Data Visualization
-**Priority:** Low
-**Complexity:** Medium
-
-- Timeline view of podcast listening history
-- Statistics (total listening time, episodes per podcast)
-- Word clouds from transcripts
-- Topic clustering visualization
+**Specs:** 001, 009, 014, 015, 016
 
 ---
 
-## Implementation Priorities
+### Phase 2: AI Features (4-5 weeks)
+**Goal:** Add local AI-powered insights using Ollama
 
-### Phase 1 (Quick Wins)
-1. Markdown Export
-2. Search and Filter
-3. Accessibility improvements
+⚠️ **Ollama Core Integration** - Foundation layer (must complete first!)
+🤖 **Quick Summaries** - 2-3 sentence overview on every episode
+📝 **Detailed Summaries** - Comprehensive breakdowns with key topics
+📚 **Resource Extraction** - Auto-detect books, tools, people mentioned
+💡 **Actionable Items** - Extract practical takeaways and ideas
 
-### Phase 2 (Core Features)
-1. AI-Powered Analysis (Ollama integration)
-2. Enhanced File Access Methods
-
-### Phase 3 (Nice to Have)
-1. Additional export formats
-2. Performance optimizations
-3. Data visualizations
+**Specs:** 006, 002, 003, 004, 005
 
 ---
 
-## Contributing
+### Phase 3: Enhanced UX (3-4 weeks)
+**Goal:** Improve file access and export capabilities
 
-To contribute to any of these improvements:
-1. Check the task list for each feature
-2. Create an issue on GitHub to discuss the approach
-3. Submit a pull request with your implementation
-4. Update this document to mark tasks as complete
+📁 **Persistent Folder Access** - Select folder once, auto-load transcripts
+🔄 **Auto Refresh** - Detect new episodes automatically
+⭐ **Favorites** - Bookmark important episodes
+📄 **Advanced Export** - Plain text, PDF, batch export options
+
+**Specs:** 007, 008, 010, 011, 012, 013
 
 ---
 
-**Last Updated:** January 30, 2025
+### Phase 4: Performance & Analytics (3-4 weeks)
+**Goal:** Scale to handle hundreds of episodes and add insights
+
+⚡ **Virtual Scrolling** - Support 1000+ episodes smoothly
+🔧 **Web Workers** - Offload processing from main thread
+📴 **Offline Support** - Service worker for offline use
+📊 **Analytics & Viz** - Listening stats, timelines, word clouds
+
+**Specs:** 017, 018, 019, 020, 021
+
+---
+
+## 🔗 Complete Specification Index
+
+**For detailed information on any feature, see [specs/README.md](specs/README.md)**
+
+The specs directory contains:
+- 21 detailed feature specifications
+- Technical implementation guides
+- Acceptance criteria checklists
+- Code examples and references
+- Testing strategies
+- Dependency graphs
+
+---
+
+## 🎯 How to Use This Roadmap
+
+### For Developers
+1. Start with **Phase 1** for immediate wins
+2. Review individual specs in [specs/](specs/) before implementation
+3. Follow dependency graph (see [specs/README.md](specs/README.md))
+4. Update spec status as you complete features
+
+### For Project Managers
+1. Use phases for sprint planning
+2. Track progress using spec checklists
+3. Adjust priorities based on user feedback
+4. Reference effort estimates for resource allocation
+
+### For Contributors
+1. Pick any spec marked "Planned"
+2. Read full spec before starting
+3. Create GitHub issue linking to spec
+4. Submit PR referencing spec ID (e.g., "SPEC-001")
+
+---
+
+## 📊 Progress Tracking
+
+| Phase | Status | Completed | Total | Progress |
+|-------|--------|-----------|-------|----------|
+| Phase 1 | 🔜 Not Started | 0 | 5 | ░░░░░░░░░░ 0% |
+| Phase 2 | 🔜 Not Started | 0 | 5 | ░░░░░░░░░░ 0% |
+| Phase 3 | 🔜 Not Started | 0 | 6 | ░░░░░░░░░░ 0% |
+| Phase 4 | 🔜 Not Started | 0 | 5 | ░░░░░░░░░░ 0% |
+| **Total** | | **0** | **21** | **░░░░░░░░░░ 0%** |
+
+---
+
+## 🤝 Contributing
+
+Found a bug or have a feature request?
+1. Check if there's already a spec for it in [specs/](specs/)
+2. If not, [create an issue](https://github.com/dado3212/apple-podcast-transcripts/issues)
+3. Reference this roadmap and relevant specs in your PR
+
+---
+
+## 📝 Change Log
+
+### 2025-01-26
+- ✅ Reorganized improvements into 21 detailed specifications
+- ✅ Created [specs/](specs/) directory with individual spec files
+- ✅ Defined 4 implementation phases
+- ✅ Established dependency graph
+- ✅ Added effort estimates for all features
+
+### Previous (2025-01-30)
+- Initial IMPROVEMENTS.md created from README
+- Identified 3 major feature categories
+- Listed 8 additional improvement areas
+
+---
+
+**Last Updated:** 2025-01-26
+**Total Features:** 21
+**Next Review:** After Phase 1 completion
+
+For the most up-to-date details, always refer to individual spec files in [specs/](specs/).
